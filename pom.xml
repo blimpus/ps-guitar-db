@@ -13,6 +13,21 @@
 		<maven.test.failure.ignore>true</maven.test.failure.ignore>
 		<spring.framework.version>4.1.8.RELEASE</spring.framework.version>
 	</properties>
+	
+
+	<dependencyManagement>
+	  <dependencies>
+	    <dependency>
+	      <groupId>org.springframework.data</groupId>
+	      <artifactId>spring-data-releasetrain</artifactId>
+	      <version>RELEASE</version>
+	      <scope>import</scope>
+	      <type>pom</type>
+	    </dependency>
+	  </dependencies>
+	</dependencyManagement>
+
+	
 	 
 	<dependencies>
 		<dependency>
@@ -72,7 +87,6 @@
 		<dependency>
 		    <groupId>org.springframework.data</groupId>
 		    <artifactId>spring-data-jpa</artifactId>
-		    <version>1.9.1.RELEASE</version>
 		</dependency>
 	</dependencies>
 

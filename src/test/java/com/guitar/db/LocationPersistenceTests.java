@@ -2,6 +2,9 @@ package com.guitar.db;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertNotSame;
+import static org.hamcrest.CoreMatchers.*;
 
 import java.util.List;
 
@@ -17,13 +20,10 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.guitar.db.model.Location;
 import com.guitar.db.repository.LocationJpaRepository;
-import com.guitar.db.repository.LocationRepository;
 
 @ContextConfiguration(locations={"classpath:com/guitar/db/applicationTests-context.xml"})
 @RunWith(SpringJUnit4ClassRunner.class)
 public class LocationPersistenceTests {
-	@Autowired
-	private LocationRepository locationRepository;
 	
 	@Autowired
 	private LocationJpaRepository locationJpaRepository;
@@ -37,30 +37,30 @@ public class LocationPersistenceTests {
 		Location location = new Location();
 		location.setCountry("Canada");
 		location.setState("British Columbia");
-		location = locationRepository.create(location);
+		location = locationJpaRepository.saveAndFlush(location);
 		
 		// clear the persistence context so we don't return the previously cached location object
 		// this is a test only thing and normally doesn't need to be done in prod code
 		entityManager.clear();
 
-		Location otherLocation = locationRepository.find(location.getId());
+		Location otherLocation = locationJpaRepository.findOne(location.getId());
 		assertEquals("Canada", otherLocation.getCountry());
 		assertEquals("British Columbia", otherLocation.getState());
 		
 		//delete BC location now
-		locationRepository.delete(otherLocation);
+		locationJpaRepository.delete(otherLocation);
 	}
 
 	@Test
 	public void testFindWithLike() throws Exception {
-		List<Location> locs = locationRepository.getLocationByStateName("New");
+		List<Location> locs = locationJpaRepository.findByStateLike("New%");
 		assertEquals(4, locs.size());
 	}
 
 	@Test
 	@Transactional  //note this is needed because we will get a lazy load exception unless we are in a tx
 	public void testFindWithChildren() throws Exception {
-		Location arizona = locationRepository.find(3L);
+		Location arizona = locationJpaRepository.findOne(3L);
 		assertEquals("United States", arizona.getCountry());
 		assertEquals("Arizona", arizona.getState());
 		
@@ -73,6 +73,49 @@ public class LocationPersistenceTests {
 	public void testFindAll() {
 		List<Location> ls = locationJpaRepository.findAll();
 		assertNotNull(ls);
+		
+	}
+	
+	@Test
+	public void testJpaAnd() {
+		List<Location> ls = locationJpaRepository.findByStateAndCountry("Utah","United States");
+		assertNotNull(ls);
+		
+		assertEquals("Utah",ls.get(0).getState());
+	}
+	
+	@Test
+	public void testJpaOr() {
+		List<Location> ls = locationJpaRepository.findByStateOrCountry("Utah", "Utah");
+		assertNotNull(ls);
+		
+		assertEquals("Utah",ls.get(0).getState());
+	}
+	
+	@Test
+	public void testJpaisEquals() {
+		List<Location> ls = locationJpaRepository.findByStateIsOrCountryEquals("Utah", "Utah");
+		assertNotNull(ls);
+		
+		assertEquals("Utah",ls.get(0).getState());
+		
+	}
+	
+	@Test
+	public void testJpaNot() {
+		List<Location> ls = locationJpaRepository.findByStateNot("Utah");
+		assertNotNull(ls);
+		
+		assertThat("Utah",not(ls.get(0).getState()));
+		//another way to assert
+		assertNotSame("Utah",ls.get(0).getState());
+	}
+	
+	@Test
+	public void testFindWithNotLike() throws Exception {
+		List<Location> locs = locationJpaRepository.findByStateNotLike("New%");
+		
+		assertEquals(46, locs.size());
 	}
 	
 }
