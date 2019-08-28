@@ -1,6 +1,7 @@
 package com.guitar.db;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 
 import java.util.List;
 
@@ -15,6 +16,7 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.guitar.db.model.Location;
+import com.guitar.db.repository.LocationJpaRepository;
 import com.guitar.db.repository.LocationRepository;
 
 @ContextConfiguration(locations={"classpath:com/guitar/db/applicationTests-context.xml"})
@@ -22,6 +24,9 @@ import com.guitar.db.repository.LocationRepository;
 public class LocationPersistenceTests {
 	@Autowired
 	private LocationRepository locationRepository;
+	
+	@Autowired
+	private LocationJpaRepository locationJpaRepository;
 
 	@PersistenceContext
 	private EntityManager entityManager;
@@ -63,4 +68,11 @@ public class LocationPersistenceTests {
 		
 		assertEquals("Fender Musical Instruments Corporation", arizona.getManufacturers().get(0).getName());
 	}
+	
+	@Test
+	public void testFindAll() {
+		List<Location> ls = locationJpaRepository.findAll();
+		assertNotNull(ls);
+	}
+	
 }
