@@ -53,11 +53,15 @@ public class ModelRepository {
 	 * Custom finder
 	 */
 	public List<Model> getModelsInPriceRange(BigDecimal lowest, BigDecimal highest) {
-		@SuppressWarnings("unchecked")
-		List<Model> mods = entityManager
-				.createQuery("select m from Model m where m.price >= :lowest and m.price <= :highest")
-				.setParameter("lowest", lowest)
-				.setParameter("highest", highest).getResultList();
+		/* Commenting out to make this a proxy
+		 * @SuppressWarnings("unchecked") List<Model> mods = entityManager
+		 * .createQuery("select m from Model m where m.price >= :lowest and m.price <= :highest"
+		 * ) .setParameter("lowest", lowest) .setParameter("highest",
+		 * highest).getResultList();
+		 */
+		List<Model> mods = modelJpaRepository
+				.findByPriceGreaterThanEqualAndPriceLessThanEqual(lowest, highest);
+		
 		return mods;
 	}
 
@@ -65,13 +69,14 @@ public class ModelRepository {
 	 * Custom finder
 	 */
 	public List<Model> getModelsByPriceRangeAndWoodType(BigDecimal lowest, BigDecimal highest, String wood) {
-		@SuppressWarnings("unchecked")
-		List<Model> mods = entityManager
-				.createQuery("select m from Model m where m.price >= :lowest and m.price <= :highest and m.woodType like :wood")
-				.setParameter("lowest", lowest)
-				.setParameter("highest", highest)
-				.setParameter("wood", "%" + wood + "%").getResultList();
-		return mods;
+//		@SuppressWarnings("unchecked")
+//		List<Model> mods = entityManager
+//				.createQuery("select m from Model m where m.price >= :lowest and m.price <= :highest and m.woodType like :wood")
+//				.setParameter("lowest", lowest)
+//				.setParameter("highest", highest)
+//				.setParameter("wood", "%" + wood + "%").getResultList();
+		
+		return modelJpaRepository.queryByPriceRangeAndWoodType(lowest, highest, "%" + wood + "%");
 	}
 
 	/**

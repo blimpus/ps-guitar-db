@@ -3,6 +3,7 @@ package com.guitar.db;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.assertNotSame;
 import static org.hamcrest.CoreMatchers.*;
 
@@ -118,4 +119,41 @@ public class LocationPersistenceTests {
 		assertEquals(46, locs.size());
 	}
 	
+	@Test
+	public void testFindWithStartingWith() throws Exception {
+		List<Location> locs = locationJpaRepository.findByStateStartingWith("Cali");
+		
+		assertEquals("California",locs.get(0).getState());
+	}
+	
+	@Test
+	public void testFindWithEndingWith() throws Exception {
+		List<Location> locs = locationJpaRepository.findByStateEndingWith("ico");
+		
+		assertEquals("New Mexico",locs.get(0).getState());
+	}
+	
+	@Test
+	public void testFindWithContaining() throws Exception {
+		List<Location> locs = locationJpaRepository.findByStateContaining("abam");
+		
+		assertEquals("Alabama",locs.get(0).getState());;
+	}
+	
+	@Test
+	public void testFindWithStateIgnoreCase() throws Exception {
+		List<Location> locs = locationJpaRepository.findByStateIgnoreCaseStartingWith("ca");
+		
+		assertTrue(locs.get(0).getState().equals("California"));
+	}
+	
+	@Test
+	public void testFindWithNotLikeSortingByStateAsc() throws Exception {
+		List<Location> locs = locationJpaRepository.findByStateNotLikeOrderByStateAsc("New");
+		
+		locs.forEach((location) -> {
+			System.out.println(locs.get(0).getState());
+		});
+		//assertEquals(46, locs.size());
+	}
 }
